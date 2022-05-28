@@ -114,8 +114,11 @@ bool signup(char *username, char *password) {
     file_open = fopen("user_db.csv", "a+");
     fprintf(file_open, "%s;%s;\n", username, password);
     fclose(file_open);
-    
-    file_open = fopen(strcat(username, ".csv"), "w");
+
+    char *filename = malloc(sizeof(username));
+    strcpy(filename, username);
+    strcat(filename, ".csv");
+    file_open = fopen(filename, "w");
     fclose(file_open);
     
     return true;
