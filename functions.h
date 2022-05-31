@@ -127,3 +127,15 @@ bool signup(char *username, char *password) {
 //nina
 //ini nyobaa
 //naninu
+
+//git add .
+//git commit -m "pesannya"
+//git push
+//git status
+
+//klo mau buat branch baru
+//git branch namabranchnya
+
+//klo mau pndah branch
+// git checkout namabranchnya
+
