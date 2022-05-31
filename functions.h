@@ -123,7 +123,3 @@ bool signup(char *username, char *password) {
     
     return true;
 }
-
-//nina
-//ini nyobaa
-//naninu
