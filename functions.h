@@ -135,6 +135,8 @@ bool signup(char *username, char *password) {
 
 //klo mau buat branch baru
 //git branch namabranchnya
+//cara masukin ke githubnya =
+//git push -u origin namabranchnya
 
 //klo mau pndah branch
 // git checkout namabranchnya
