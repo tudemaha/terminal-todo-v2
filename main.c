@@ -9,6 +9,8 @@ struct user {
     char password[9];
 };
 
+void currentSession(char *username);
+
 int main() {
     char choice;
     struct user temp;
@@ -41,7 +43,7 @@ int main() {
             fgets(temp.password, 9, stdin);
             temp.password[strcspn(temp.password, "\n")] = 0;
 
-            if(login(temp.username, temp.password));
+            if(login(temp.username, temp.password)) currentSession(temp.username);
             else {
                 printf("\nUsername atau password yang Anda masukkan tidak terdaftar.\n");
                 login_confirm:
@@ -61,7 +63,7 @@ int main() {
                 "1. Username maksimal 10 huruf.\n"
                 "2. Username tidak boleh menggunakan spasi.\n"
                 "3. Password dibuat dengan kombinasi angka, huruf, dan karakter.\n"
-                "4. Password tidak maksimal 8 karakter.\n"
+                "4. Password maksimal 8 karakter.\n"
                 "5. Password tidak boleh berisi karakter titik dua ';'.\n"
                 "6. Jika karakter yang dimasukkan di luar batas, maka akan diambil n karakter pertama.\n"
             );
@@ -111,4 +113,64 @@ int main() {
     }
 
     return 0;
+}
+
+void currentSession(char *username) {
+    char option;
+
+    session:
+    printf("========== SESI AKTIF ==========\n");
+    printf("Anda masuk sebagai %s.\n\n", username);
+    
+    printf("Menu:\n1. Tambah To-Do\n2. Selesaikan To-Do\n3. Lihat To-Do List\n4. Keluar\n");
+    insert_option:
+    printf("Masukkan pilihan: ");
+    scanf(" %c", &option);
+
+    switch(option) {
+        case '1':
+            break;
+
+        case '2':
+            printf("\nMode penyelesaian:\n1. Mode Biasa\n2. Mode Strict\n3. Batal\n");
+            mode:
+            printf("Masukkan pilihan: ");
+            scanf(" %c", &option);
+            switch(option) {
+                case '1':
+                    general_finish(username);
+                    goto session;
+                    break;
+
+                case '2':
+                    break;
+
+                case '3':
+                    goto session;
+                    break;
+
+                default:
+                    goto mode;
+                    break;
+            }
+            break;
+
+        case '3':
+
+            break;
+            
+        case '4':
+            printf("\n");
+            exit:
+            printf("Keluar dan kembali ke beranda? (y/n): ");
+            scanf(" %c", &option);
+            if(option == 'y' || option == 'Y') return;
+            else if(option == 'n' || option == 'N') goto session;
+            else goto exit;
+            break;
+
+        default:
+            goto insert_option;
+            break;
+    }
 }

@@ -2,33 +2,42 @@
 #include <string.h>
 
 #define MAX_USER 50
+#define MAX_TODO 50
 
-struct parse_user {
+struct User {
     char username[10];
     char password[8];
     bool used;
-    struct parse_user *next;
+    struct User *next;
+};
+
+struct Todo {
+    char activity[100];
+    char date[11];
+    char status;
+    struct Todo *next;
 };
 
 FILE *file_open;
-char buffer[50];
+char buffer[100];
 
 bool login(char *username, char *password);
 bool signup(char *username, char *password);
-struct parse_user *user_parsing();
+struct User *parse_user();
 int getHash(char *username);
 void removeNewLine();
-
+void general_finish(char *username);
+struct Todo *parse_todo(char *username);
 
 bool login(char *username, char *password) {
     int usernameHash = getHash(username);
-    struct parse_user *data = user_parsing();
+    struct User *data = parse_user();
     
 
     if(strcmp(data[usernameHash].username, username) == 0
         && strcmp(data[usernameHash].password, password) == 0) return true;
     else {
-        struct parse_user *iterate = &(data[usernameHash]);
+        struct User *iterate = &(data[usernameHash]);
         while(iterate->next != NULL) {
             iterate = iterate->next;
             if(strcmp(iterate->username, username) == 0
@@ -41,8 +50,8 @@ bool login(char *username, char *password) {
     return false;
 }
 
-struct parse_user *user_parsing() {
-    struct parse_user *user_data = (struct parse_user*)malloc(MAX_USER * sizeof(struct parse_user));
+struct User *parse_user() {
+    struct User *user_data = (struct User*)malloc(MAX_USER * sizeof(struct User));
     for(int i = 0; i < MAX_USER; i++) {
         user_data[i].used = false;
         user_data[i].next = NULL;
@@ -55,7 +64,7 @@ struct parse_user *user_parsing() {
         system("pause");
         exit(0);
     } else {
-        while(fgets(buffer, 50, file_open)) {
+        while(fgets(buffer, 100, file_open)) {
             // printf("%s\n", buffer);
             char *value = strtok(buffer, ";");
             // printf("%s\n", value);
@@ -67,8 +76,8 @@ struct parse_user *user_parsing() {
                 // printf("%s\n", value);
                 strcpy(user_data[index].password, value);
             } else {
-                struct parse_user *temp = (struct parse_user*)malloc(sizeof(struct parse_user));
-                struct parse_user *iterate = &(user_data[index]);
+                struct User *temp = (struct User*)malloc(sizeof(struct User));
+                struct User *iterate = &(user_data[index]);
                 temp->used = true;
                 temp->next = NULL;
                 strcpy(temp->username, value);
@@ -99,12 +108,12 @@ void removeNewLine() {
 }
 
 bool signup(char *username, char *password) {
-    struct parse_user *data = user_parsing();
+    struct User *data = parse_user();
     int usernameHash = getHash(username);
 
     if(strcmp(data[usernameHash].username, username) == 0) return false;
     else {
-        struct parse_user *iterate = &(data[usernameHash]);
+        struct User *iterate = &(data[usernameHash]);
         while(iterate->next != NULL) {
             iterate = iterate->next;
             if(strcmp(iterate->username, username) == 0) return false;
@@ -122,4 +131,102 @@ bool signup(char *username, char *password) {
     fclose(file_open);
     
     return true;
+}
+
+void general_finish(char *username) {
+    struct Todo *data = parse_todo(username);
+    struct Todo *iterate;
+    int id, finish;
+    char status;
+
+    start_finish:
+    iterate = data;
+    id = 0;
+    printf("\nTo-Do List:\n");
+    while(iterate != NULL) {
+        printf("%d - %s - %s - %c\n", id, iterate->activity, iterate->date, iterate->status);
+        id++;
+        iterate = iterate->next;
+    }
+
+    check:
+    printf("\nMasukkan ID To-Do untuk diselesaikan (masukkan -1 untuk membatalkan): ");
+    scanf("%d", &finish);
+
+    if(finish < -1 || finish > id) {
+        printf("Masukkan ID yang valid\n");
+        goto check;
+    }
+    else if(finish == -1) return;
+    else {
+        iterate = data;
+        for(int i = 0; i < finish; i++) {
+            iterate = iterate->next;
+        }
+    }
+
+    option:
+    printf("Yakin menyelesaikan '%s'? (y/n): ", iterate->activity);
+    scanf(" %c", &status);
+    if(status == 'y' || status == 'Y') {
+        iterate->status = '1';
+    }
+    else if(status == 'n' || status == 'N') goto check;
+    else goto option;
+
+    char *filename = malloc(sizeof(username));
+    strcpy(filename, username);
+    strcat(filename, ".csv");
+
+    file_open = fopen(filename, "w");
+    iterate = data;
+    while(iterate != NULL) {
+        fprintf(file_open, "%s;%s;%c;\n", iterate->activity, iterate->date, iterate->status);
+        iterate = iterate->next;
+    }
+    fclose(file_open);
+
+    printf("Berhasil menyelesaikan.\n");
+    system("pause");
+}
+
+struct Todo *parse_todo(char *username) {
+    struct Todo *head = NULL;
+    struct Todo *tail = NULL;
+    
+    char *filename = malloc(sizeof(username));
+    strcpy(filename, username);
+    strcat(filename, ".csv");
+
+    file_open = fopen(filename, "r");
+
+    if(!file_open) {
+        printf("\nData user tidak tersedia, aplikasi ditutup...\n");
+        system("pause");
+        exit(0);
+    } else {
+        while(fgets(buffer, 100, file_open)) {
+            struct Todo *temp = (struct Todo*)malloc(sizeof(struct Todo));
+
+            char *value = strtok(buffer, ";");
+            strcpy(temp->activity, value);
+
+            value = strtok(NULL, ";");
+            strcpy(temp->date, value);
+
+            value = strtok(NULL, ";");
+            temp->status = *value;
+
+            temp->next = NULL;
+
+            if(head == NULL) head = tail = temp;
+            else {
+                tail->next = temp;
+                tail = temp;
+            }
+        }
+    }
+
+    fclose(file_open);
+    return head;
 }
