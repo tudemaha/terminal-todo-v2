@@ -119,6 +119,7 @@ void currentSession(char *username) {
     char option;
 
     session:
+    // system("cls");
     printf("========== SESI AKTIF ==========\n");
     printf("Anda masuk sebagai %s.\n\n", username);
     
@@ -143,6 +144,8 @@ void currentSession(char *username) {
                     break;
 
                 case '2':
+                    strict_finish(username);
+                    goto session;
                     break;
 
                 case '3':

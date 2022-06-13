@@ -27,6 +27,7 @@ struct User *parse_user();
 int getHash(char *username);
 void removeNewLine();
 void general_finish(char *username);
+void strict_finish(char *username);
 struct Todo *parse_todo(char *username);
 
 bool login(char *username, char *password) {
@@ -177,6 +178,55 @@ void general_finish(char *username) {
     char *filename = malloc(sizeof(username));
     strcpy(filename, username);
     strcat(filename, ".csv");
+
+    file_open = fopen(filename, "w");
+    iterate = data;
+    while(iterate != NULL) {
+        fprintf(file_open, "%s;%s;%c;\n", iterate->activity, iterate->date, iterate->status);
+        iterate = iterate->next;
+    }
+    fclose(file_open);
+
+    printf("Berhasil menyelesaikan.\n");
+    system("pause");
+}
+
+void strict_finish(char *username) {
+    struct Todo *data = parse_todo(username);
+    struct Todo *iterate;
+    char status;
+    int id;
+    
+    char *filename = malloc(sizeof(username));
+    strcpy(filename, username);
+    strcat(filename, ".csv");
+
+    iterate = data;
+    id = 0;
+    printf("\nTo-Do List:\n");
+    while(iterate != NULL) {
+        printf("%d - %s - %s - %c\n", id, iterate->activity, iterate->date, iterate->status);
+        id++;
+        iterate = iterate->next;
+    }
+
+    iterate = data;
+    while(iterate != NULL) {
+        if(iterate->status == '0') {
+            break;
+        }
+        iterate = iterate->next;
+    }
+    
+    confirm:
+    printf(
+        "\nStrict mode akan menyelesaikan To-Do teratas yang belum diselesaikan\n"
+        "Lanjutkan menyelesaikan '%s'? (y/n): ", iterate->activity);
+    scanf(" %c", &status);
+
+    if(status == 'y' || status == 'Y') iterate->status = '1';
+    else if(status == 'n' || status == 'N') return;
+    else goto confirm;
 
     file_open = fopen(filename, "w");
     iterate = data;
