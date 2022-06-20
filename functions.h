@@ -51,6 +51,127 @@ bool login(char *username, char *password) {
     return false;
 }
 
+void insert_todo(char *username){
+    char *filename = malloc(sizeof(username));
+    strcpy(filename, username);
+    strcat(filename, ".csv");
+
+    file_open = fopen(filename, "a+");
+
+    char todo[2][500];
+
+    while(getchar() != '\n');
+
+    printf("\nIngatkan untuk (maks. 500 karakter): ");
+    fgets(todo[0], 500, stdin);
+    todo[0][strcspn(todo[0], "\n")] = 0;
+
+    if(strlen(todo[0]) == 0) {
+        printf("Anda belum memasukkan kegiatan.\n");
+        insert_todo(username);
+    }
+    
+
+    printf("Deadline (format: dd/mm/yyyy) [opsional]: ");
+    fgets(todo[1], 11, stdin);
+    todo[1][strcspn(todo[1], "\n")] = 0;
+    
+
+    if(!file_open) {
+        printf("Database todo tidak tersedia, program dihentikan.\n");
+        printf("Tekan sembarang untuk keluar dari program...");
+        getch();
+        exit(1);
+    } else {
+        fprintf(file_open, "%s;%s;;\n", todo[0], todo[1]);
+        fclose(file_open);
+        printf("\nBerhasil memasukkan kegiatan.\n");
+    }
+
+    while(getchar() != '\n');
+
+    char pilihan[2];
+    printf("Ingin memasukkan kegiatan lain? (y/n): ");
+    scanf("%s", &pilihan);
+    switch(pilihan[0]) {
+        case 'y':
+            //system("cls");
+            insert_todo(username);
+            break;
+
+        case 'n':
+            currentSession(username);
+            break;
+
+        default:
+            break;
+    }
+
+}
+
+void show_todo(char *username){
+    char buffer[4000];
+    int row = 0, column = 0;
+
+    char todo_list[500][6][500];
+
+    char *filename = malloc(sizeof(username));
+    strcpy(filename, username);
+    strcat(filename, ".csv");
+
+    file_open = fopen(filename, "r");
+
+    if(!file_open) {
+        printf("Database todo tidak tersedia, program dihentikan.\nTekan sembarang untuk kembali ke menu...");
+        getch();
+        currentSession(username);
+    } else {
+
+        while(fgets(buffer, 4000, file_open)) {
+            column = 0;
+
+            char *value = strtok(buffer, ";");
+
+            while(value) {
+                if(column == 0) strcpy(todo_list[row][column], value);
+                if(column == 1) strcpy(todo_list[row][column], value);
+                if(column == 2) strcpy(todo_list[row][column], value);
+                if(column == 3) strcpy(todo_list[row][column], value);
+
+                value = strtok(NULL, ";");
+                column++;
+            }
+            row++;
+        }
+    }
+    fclose(file_open);
+
+    for(int i = 0; i < 500; i++) {
+        for(int j = 0; j < 5; j++) {
+            todo_list[i][j][strcspn(todo_list[i][j], "\n")] = 0;
+        }
+        
+    }
+
+    int count = 1;
+    system("cls");
+    printf("\nDaftar kegiatanmu:\n");
+    for(int i = 0; i < 500; i++) {
+        if(strcmp(todo_list[i][0], username) == 0) {
+            printf("%d. ", count++);
+            printf("%d - ", i);
+            printf("%s - ", todo_list[i][1]);
+            printf("%s - ", todo_list[i][2]);
+            printf("%s\n", todo_list[i][3]);
+        }
+    }
+
+    printf("\n\nTekan sembarang tombol untuk kembali ke menu sebelumnya...\n");
+    getch();
+    system("cls");
+    currentSession(username);
+
+}
 struct User *parse_user() {
     struct User *user_data = (struct User*)malloc(MAX_USER * sizeof(struct User));
     for(int i = 0; i < MAX_USER; i++) {
