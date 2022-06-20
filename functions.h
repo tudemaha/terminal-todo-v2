@@ -29,11 +29,16 @@ void removeNewLine();
 void general_finish(char *username);
 void strict_finish(char *username);
 struct Todo *parse_todo(char *username);
+void insert_todo(char *username);
+void show_todo(char *username);
 
 bool login(char *username, char *password) {
     int usernameHash = getHash(username);
     struct User *data = parse_user();
     
+
+    // printf("%s %s\n", username, data[usernameHash].username);
+    // printf("%s %s\n", password, data[usernameHash].password);
 
     if(strcmp(data[usernameHash].username, username) == 0
         && strcmp(data[usernameHash].password, password) == 0) return true;
@@ -56,13 +61,11 @@ void insert_todo(char *username){
     strcpy(filename, username);
     strcat(filename, ".csv");
 
-    file_open = fopen(filename, "a+");
 
     char todo[2][500];
 
-    removeNewLine();
-
     tambah:
+    removeNewLine();
     printf("\nIngatkan untuk (maks. 500 karakter): ");
     fgets(todo[0], 500, stdin);
     todo[0][strcspn(todo[0], "\n")] = 0;
@@ -71,32 +74,30 @@ void insert_todo(char *username){
         printf("Anda belum memasukkan kegiatan.\n");
         goto tambah;
     }
-    
 
     printf("Deadline (format: dd/mm/yyyy) [opsional]: ");
     fgets(todo[1], 11, stdin);
     todo[1][strcspn(todo[1], "\n")] = 0;
-    
+    if(strlen(todo[1]) == 0) strcpy(todo[1], "nd");
 
     if(!file_open) {
         printf("\nData user tidak tersedia, aplikasi ditutup...\n");
         system("pause");
         exit(0);
     } else {
+        file_open = fopen(filename, "a+");
         fprintf(file_open, "%s;%s;0;\n", todo[0], todo[1]);
         fclose(file_open);
         printf("\nBerhasil memasukkan kegiatan.\n");
     }
 
-    removeNewLine();
-
     char pilihan;
+    removeNewLine();
     ulang:
     printf("Ingin memasukkan kegiatan lain? (y/n): ");
-    scanf("%s", &pilihan);
+    scanf("%c", &pilihan);
     switch(pilihan) {
         case 'y':
-            //system("cls");
             goto tambah;
             break;
 
@@ -112,11 +113,11 @@ void insert_todo(char *username){
 }
 
 void show_todo(char *username){
-
     struct Todo *data = parse_todo(username);
-    struct Todo *iterate;
-    int id;
+    struct Todo *iterate = data;
+    int id = 0;
     char *filename = malloc(sizeof(username));
+
     strcpy(filename, username);
     strcat(filename, ".csv");
 
@@ -127,22 +128,17 @@ void show_todo(char *username){
         system("pause");
         exit(0);
     } else {
-        iterate = data;
-        id = 0;
         printf("\nTo-Do List:\n");
         while(iterate != NULL) {
-        printf("%d - %s - %s - %c\n", id, iterate->activity, iterate->date, iterate->status);
-        id++;
-        iterate = iterate->next;
-    }
+            printf("%d - %s - %s - %c\n", id, iterate->activity, iterate->date, iterate->status);
+            id++;
+            iterate = iterate->next;
+        }
     }
     fclose(file_open);
-
-    printf("\n\nTekan sembarang tombol untuk kembali ke menu sebelumnya...\n");
-    removeNewLine();
-    return;
-
 }
+
+
 struct User *parse_user() {
     struct User *user_data = (struct User*)malloc(MAX_USER * sizeof(struct User));
     for(int i = 0; i < MAX_USER; i++) {
@@ -229,26 +225,24 @@ bool signup(char *username, char *password) {
 void general_finish(char *username) {
     struct Todo *data = parse_todo(username);
     struct Todo *iterate;
-    int id, finish;
+    int id = 0, finish;
     char status;
 
-    start_finish:
+    show_todo(username);
+
     iterate = data;
-    id = 0;
-    printf("\nTo-Do List:\n");
     while(iterate != NULL) {
-        printf("%d - %s - %s - %c\n", id, iterate->activity, iterate->date, iterate->status);
         id++;
         iterate = iterate->next;
     }
 
-    check:
+    general_start:
     printf("\nMasukkan ID To-Do untuk diselesaikan (masukkan -1 untuk membatalkan): ");
     scanf("%d", &finish);
 
     if(finish < -1 || finish > id) {
         printf("Masukkan ID yang valid\n");
-        goto check;
+        goto general_start;
     }
     else if(finish == -1) return;
     else {
@@ -264,8 +258,9 @@ void general_finish(char *username) {
     if(status == 'y' || status == 'Y') {
         iterate->status = '1';
     }
-    else if(status == 'n' || status == 'N') goto check;
+    else if(status == 'n' || status == 'N') goto general_start;
     else goto option;
+
 
     char *filename = malloc(sizeof(username));
     strcpy(filename, username);
@@ -287,21 +282,7 @@ void strict_finish(char *username) {
     struct Todo *data = parse_todo(username);
     struct Todo *iterate;
     char status;
-    int id;
     
-    char *filename = malloc(sizeof(username));
-    strcpy(filename, username);
-    strcat(filename, ".csv");
-
-    iterate = data;
-    id = 0;
-    printf("\nTo-Do List:\n");
-    while(iterate != NULL) {
-        printf("%d - %s - %s - %c\n", id, iterate->activity, iterate->date, iterate->status);
-        id++;
-        iterate = iterate->next;
-    }
-
     iterate = data;
     while(iterate != NULL) {
         if(iterate->status == '0') {
@@ -319,6 +300,10 @@ void strict_finish(char *username) {
     if(status == 'y' || status == 'Y') iterate->status = '1';
     else if(status == 'n' || status == 'N') return;
     else goto confirm;
+    
+    char *filename = malloc(sizeof(username));
+    strcpy(filename, username);
+    strcat(filename, ".csv");
 
     file_open = fopen(filename, "w");
     iterate = data;

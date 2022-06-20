@@ -131,6 +131,7 @@ void currentSession(char *username) {
     switch(option) {
         case '1':
             insert_todo(username);
+            goto session;
             break;
 
         case '2':
@@ -161,6 +162,8 @@ void currentSession(char *username) {
 
         case '3':
             show_todo(username);
+            system("pause");
+            goto session;
             break;
             
         case '4':
