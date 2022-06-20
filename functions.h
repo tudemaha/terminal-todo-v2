@@ -60,15 +60,16 @@ void insert_todo(char *username){
 
     char todo[2][500];
 
-    while(getchar() != '\n');
+    void removeNewLine();
 
+    tambah:
     printf("\nIngatkan untuk (maks. 500 karakter): ");
     fgets(todo[0], 500, stdin);
     todo[0][strcspn(todo[0], "\n")] = 0;
 
     if(strlen(todo[0]) == 0) {
         printf("Anda belum memasukkan kegiatan.\n");
-        insert_todo(username);
+        goto tambah;
     }
     
 
@@ -78,32 +79,33 @@ void insert_todo(char *username){
     
 
     if(!file_open) {
-        printf("Database todo tidak tersedia, program dihentikan.\n");
-        printf("Tekan sembarang untuk keluar dari program...");
-        getch();
-        exit(1);
+        printf("\nData user tidak tersedia, aplikasi ditutup...\n");
+        system("pause");
+        exit(0);
     } else {
-        fprintf(file_open, "%s;%s;;\n", todo[0], todo[1]);
+        fprintf(file_open, "%s;%s;0;\n", todo[0], todo[1]);
         fclose(file_open);
         printf("\nBerhasil memasukkan kegiatan.\n");
     }
 
     while(getchar() != '\n');
 
-    char pilihan[2];
+    char pilihan;
+    ulang:
     printf("Ingin memasukkan kegiatan lain? (y/n): ");
     scanf("%s", &pilihan);
-    switch(pilihan[0]) {
+    switch(pilihan) {
         case 'y':
             //system("cls");
-            insert_todo(username);
+            goto tambah;
             break;
 
         case 'n':
-            currentSession(username);
+            return;
             break;
 
         default:
+        goto ulang;
             break;
     }
 
@@ -122,9 +124,9 @@ void show_todo(char *username){
     file_open = fopen(filename, "r");
 
     if(!file_open) {
-        printf("Database todo tidak tersedia, program dihentikan.\nTekan sembarang untuk kembali ke menu...");
-        getch();
-        currentSession(username);
+        printf("\nData user tidak tersedia, aplikasi ditutup...\n");
+        system("pause");
+        exit(0);
     } else {
 
         while(fgets(buffer, 4000, file_open)) {
