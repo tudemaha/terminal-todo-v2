@@ -16,6 +16,8 @@ int main() {
     struct user temp;
 
     start:
+    system("cls");
+    system("color 07");
     printf(
         "=================================\n"
         "||      SELAMAT DATANG DI      ||\n"
@@ -33,6 +35,7 @@ int main() {
     switch(choice) {
         case '1':
             start_login:
+            system("color 07");
             printf("\nUsername\t: ");
             removeNewLine();
             fgets(temp.username, 11, stdin);
@@ -45,6 +48,7 @@ int main() {
 
             if(login(temp.username, temp.password)) currentSession(temp.username);
             else {
+                system("color 0c");
                 printf("\nUsername atau password yang Anda masukkan tidak terdaftar.\n");
                 login_confirm:
                 printf("Ingin mengulangi? (y/n): ");
@@ -58,6 +62,7 @@ int main() {
             break;
 
         case '2':
+            system("color 07");
             printf(
                 "\nSyarat pembuatan akun:\n"
                 "1. Username maksimal 10 huruf.\n"
@@ -80,11 +85,13 @@ int main() {
             temp.password[strcspn(temp.password, "\n")] = 0;
 
             if(signup(temp.username, temp.password)) {
+                system("color 17");
                 printf("\nAkun berhasil didaftarkan.\n");
                 printf("Username\t: %s\nPassword\t: %s\n", temp.username, temp.password);
                 printf("\nSilakan gunakan akun Anda untuk masuk.\n");
                 system("pause");
             } else {
+                system("color 0c");
                 printf("\nUsername yang Anda masukkan sudah digunakan.\n");
                 signup_confirm:
                 printf("Ingin mengulangi? (y/n): ");
@@ -119,7 +126,8 @@ void currentSession(char *username) {
     char option;
 
     session:
-    // system("cls");
+    system("cls");
+    system("color 17");
     printf("========== SESI AKTIF ==========\n");
     printf("Anda masuk sebagai %s.\n\n", username);
     
