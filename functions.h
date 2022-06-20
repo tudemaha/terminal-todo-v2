@@ -19,7 +19,7 @@ struct Todo {
 };
 
 FILE *file_open;
-char buffer[100];
+char buffer[1024];
 
 bool login(char *username, char *password);
 bool signup(char *username, char *password);
@@ -60,7 +60,7 @@ void insert_todo(char *username){
 
     char todo[2][500];
 
-    void removeNewLine();
+    removeNewLine();
 
     tambah:
     printf("\nIngatkan untuk (maks. 500 karakter): ");
@@ -88,7 +88,7 @@ void insert_todo(char *username){
         printf("\nBerhasil memasukkan kegiatan.\n");
     }
 
-    while(getchar() != '\n');
+    removeNewLine();
 
     char pilihan;
     ulang:
@@ -112,11 +112,10 @@ void insert_todo(char *username){
 }
 
 void show_todo(char *username){
-    char buffer[4000];
-    int row = 0, column = 0;
 
-    char todo_list[500][6][500];
-
+    struct Todo *data = parse_todo(username);
+    struct Todo *iterate;
+    int id;
     char *filename = malloc(sizeof(username));
     strcpy(filename, username);
     strcat(filename, ".csv");
@@ -128,50 +127,20 @@ void show_todo(char *username){
         system("pause");
         exit(0);
     } else {
-
-        while(fgets(buffer, 4000, file_open)) {
-            column = 0;
-
-            char *value = strtok(buffer, ";");
-
-            while(value) {
-                if(column == 0) strcpy(todo_list[row][column], value);
-                if(column == 1) strcpy(todo_list[row][column], value);
-                if(column == 2) strcpy(todo_list[row][column], value);
-                if(column == 3) strcpy(todo_list[row][column], value);
-
-                value = strtok(NULL, ";");
-                column++;
-            }
-            row++;
-        }
+        iterate = data;
+        id = 0;
+        printf("\nTo-Do List:\n");
+        while(iterate != NULL) {
+        printf("%d - %s - %s - %c\n", id, iterate->activity, iterate->date, iterate->status);
+        id++;
+        iterate = iterate->next;
+    }
     }
     fclose(file_open);
 
-    for(int i = 0; i < 500; i++) {
-        for(int j = 0; j < 5; j++) {
-            todo_list[i][j][strcspn(todo_list[i][j], "\n")] = 0;
-        }
-        
-    }
-
-    int count = 1;
-    system("cls");
-    printf("\nDaftar kegiatanmu:\n");
-    for(int i = 0; i < 500; i++) {
-        if(strcmp(todo_list[i][0], username) == 0) {
-            printf("%d. ", count++);
-            printf("%d - ", i);
-            printf("%s - ", todo_list[i][1]);
-            printf("%s - ", todo_list[i][2]);
-            printf("%s\n", todo_list[i][3]);
-        }
-    }
-
     printf("\n\nTekan sembarang tombol untuk kembali ke menu sebelumnya...\n");
-    getch();
-    system("cls");
-    currentSession(username);
+    removeNewLine();
+    return;
 
 }
 struct User *parse_user() {
